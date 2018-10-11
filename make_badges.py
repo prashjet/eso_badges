@@ -21,9 +21,9 @@ If delete_tmp is False, additionally create subdirectories:
 - 'individual' with images of each individual namebadge
 """
 
-particpant_file  = '../example/participants.xlsx'
+particpant_file  = 'example/participants.xlsx'
 event = {'Name':'Luminaries of Astronomy', 'Date':'11/10/18'}
-outdir = '../example/'
+outdir = 'example/'
 make_badges(particpant_file=particpant_file,
             event=event,
             outdir=outdir,

@@ -32,7 +32,7 @@ Requires [Pandas](https://pandas.pydata.org/), [Python Imaging Library](https://
 
 Use the
 
-  $ make_badges
+    make_badges
 
 function, which accepts the following keyword arguments:
 
@@ -54,4 +54,4 @@ and creates output:
 
 An example excel spreadsheet and output can be found in the 'example' directory. Create this using the script:
 
-  $ python example_script.py
+    $ python example_script.py

@@ -55,5 +55,3 @@ and creates output:
 An example excel spreadsheet and output can be found in the 'example' directory. Create this using the script:
 
   $ python example_script.py
-
-END

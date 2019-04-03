@@ -103,13 +103,14 @@ def get_template_nambebadge(event,
         iterate_text(fig,
                      0., 0.66, 1, 0.1,
                      0.5, 0.5, event['Name'],
-                     size_init=8,
+                     size_init=14,#8,
                      kw_text={'ha':'center', 'va':'center', 'weight':'bold'})
         # event date
         iterate_text(fig,
-                     0., 0.623, 1, 0.1,
+                     # 0., 0.623, 1, 0.1,
+                     0., 0.6, 1, 0.1,
                      0.5, 0.5, event['Date'],
-                     size_init=8,
+                     size_init=12,#8,
                      kw_text={'ha':'center', 'va':'center'})
 
     return fig
@@ -141,15 +142,15 @@ def add_names(fig,
         # first name
         txt = iterate_text(fig,
                 0., 0.345, 1, 0.2,
-                0.5, 0.5, person['First Name'],
-                size_init=13.8,
+                0.5, 0.5, person['First Name'].upper(),
+                size_init=18,#14.,
                 kw_text={'ha':'center', 'va':'center', 'weight':'bold'})
         txtlist += [txt]
         # surname
         txt = iterate_text(fig,
                 0., 0.27, 1, 0.2,
                 0.5, 0.5, person['Surname'],
-                size_init=13.8,
+                size_init=14,#13.8,
                 kw_text={'ha':'center', 'va':'center', 'weight':'bold'})
         txtlist += [txt]
         # affilitation
@@ -157,7 +158,7 @@ def add_names(fig,
             txt = iterate_text(fig,
                     0., 0.187, 1, 0.2,
                     0.5, 0.5, person['Affiliation'],
-                    size_init=10,
+                    size_init=14,#10,
                     kw_text={'ha':'center', 'va':'center'})
             txtlist += [txt]
 
@@ -294,18 +295,27 @@ def make_badges(particpant_file=None,
                 color=None,
                 delete_tmp=False,
                 outfile='badges.pdf'):
-    """create pages of namebadges from an excel spreadsheet for doublesided
-    printing
+    """create namebadges from an excel spreadsheet ready for doublesided printing
 
     Keyword arguments:
-    particpant_file -- location of excel spreadsheet which has columns for
-        Surname, First Name and Affiliation of participants
-    event -- a dictionary of the form {'Name':'xxx', 'Date':'yyy'}
+    particpant_file -- location of excel spreadsheet which has columns for Surname,
+        First Name and Affiliation of participants
+    event -- a dictionary {'Name':'xxx', 'Date':'yyy'}
     outdir -- directory to store the output, default current directory
-    orientation -- vertical or horizontal
-    alpha -- transparency of background, 0 to 1
-    with_url -- whether to use background with ESO url and name, True or False
-    n_blank - number of blanks badges to produce
+    outfile -- name of output file, default badges.pdf
+    orientation -- vertical or horizontal, default horizontal
+    alpha -- transparency of background from 0 to 1, default 0.5
+    with_url -- whether to use background with ESO url and name, default False
+    n_blank -- number of blank badges to print, default 0
+        (this is useful for unexpected arrivals & using up the last sheet of paper)
+    delete_tmp -- delete individual badges/pages of badges, default False
+    color -- color of background, accepts any matplotlib color specification
+
+    Output:
+    Creates 'badges.pdf' (or outfile) in outdir formatted for double-sided printing.
+    If delete_tmp is False, additionally create subdirectories:
+    - 'pages' which contains individual pages of badges
+    - 'individual' with images of each individual namebadge
     """
 
     people = read_spreadsheet(particpant_file)

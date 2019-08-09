@@ -217,7 +217,7 @@ def collate_on_page(N_ppl,
                     outroot='badges',
                     n_rows=3,
                     n_cols=3,
-                    show_frame=True):
+                    show_frame=False):
     n_per_page = n_rows * n_cols
     n_pages = int(np.ceil(1.*N_ppl/n_per_page))
     print('Making {0} badges on {1} pages'.format(N_ppl, n_pages))

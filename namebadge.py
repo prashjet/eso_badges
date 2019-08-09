@@ -19,7 +19,8 @@ warnings.filterwarnings("ignore")
 def read_spreadsheet(filename):
     xl = pd.read_excel(filename)
     N_ppl = len(xl)
-    tmp = ['{0} {1}'.format(xl['First Name'][i], xl['Surname'][i])
+    tmp = ['{0} {1}'.format(xl['First Name'][i].encode('utf-8'),
+                            xl['Surname'][i].encode('utf-8'))
            for i in range(N_ppl)]
     xl['Full Name'] = tmp
     xl = xl.sort_values(['Surname'])
@@ -215,13 +216,14 @@ def collate_on_page(N_ppl,
                     orientation='horizontal',
                     outroot='badges',
                     n_rows=3,
-                    n_cols=3):
-
+                    n_cols=3,
+                    show_frame=True):
     n_per_page = n_rows * n_cols
-    n_pages = int(np.ceil(N_ppl/n_per_page))
+    n_pages = int(np.ceil(1.*N_ppl/n_per_page))
+    print('Making {0} badges on {1} pages'.format(N_ppl, n_pages))
     mm2inch = 25.4
-    page_width = 8.27
-    page_height = 11.69
+    page_width = 210./mm2inch
+    page_height = 294./mm2inch
     border_width = 12./mm2inch
     border_height = 15./mm2inch
     bdg_width = 60./mm2inch
@@ -230,6 +232,9 @@ def collate_on_page(N_ppl,
     # get canvas units i.e. page minus border
     cnv_width = page_width - 2*border_width
     cnv_height = page_height - 2*border_height
+    badge_border = 1.5/mm2inch
+    badge_border_width_cnv_units = badge_border/cnv_width
+    badge_border_height_cnv_units = badge_border/cnv_height
 
     if orientation is 'horizontal':
         rot = 90.
@@ -246,6 +251,7 @@ def collate_on_page(N_ppl,
         h = ch * cnv_height / page_height
         return x0, y0, w, h
 
+    print('Collating namebadges on page...')
     for i_page in range(n_pages):
         print('...', i_page+1, 'out of', n_pages)
 
@@ -259,21 +265,42 @@ def collate_on_page(N_ppl,
             try:
                 badge = Image.open(bfile)
             except:
+                print('File {0} not found'.format(bfile))
                 break
-            x0 = (i_badge % n_cols)
-            y0 = np.int(np.floor(1.*i_badge/n_rows))
-            x0 /= 1.*n_cols
-            y0 /= 1.*n_rows
-            cnv = [x0, y0, 1./n_cols, 1./n_rows]
+            # place badges on front
+            x0 = 1.*(i_badge % n_cols) / n_cols
+            y0 = 1.* np.int(np.floor(1.*i_badge/n_rows)) / n_rows
+            width = 1./n_cols
+            height = 1./n_rows
+            x0 += badge_border_width_cnv_units  # border adjustemnts
+            y0 += badge_border_height_cnv_units
+            width -= 2.*badge_border_width_cnv_units
+            height -= 2.*badge_border_height_cnv_units
+            cnv = [x0, y0, width, height]
             ax = fig.add_axes(cnv_to_fig_units(cnv))
             img = badge.rotate(rot, expand=1)
             ax.imshow(img, aspect='auto')
-            ax.axis('off')
-            cnv = [1.-1./n_cols-x0, y0, 1./n_cols, 1./n_rows]
+            if show_frame==True:
+                ax.axis('on')
+                ax.set_xticks([])
+                ax.set_yticks([])
+            else:
+                ax.axis('off')
+            # # place badges on back
+            x0 = 1.*(i_badge % n_cols) / n_cols
+            x0 = 1.-1./n_cols-x0
+            x0 += badge_border_width_cnv_units
+            # y0, width, height unchanged from front
+            cnv = [x0, y0, width, height]
             ax_bk = fig_bk.add_axes(cnv_to_fig_units(cnv))
             img = badge.rotate(rot_bk, expand=1)
             ax_bk.imshow(img, aspect='auto')
-            ax_bk.axis('off')
+            if show_frame==True:
+                ax_bk.axis('on')
+                ax_bk.set_xticks([])
+                ax_bk.set_yticks([])
+            else:
+                ax_bk.axis('off')
 
         outfile = '{0}/pages/{1}_{2:03d}_a.pdf'.format(outdir, outroot, i_page)
         fig.savefig(outfile)
@@ -289,7 +316,7 @@ def make_badges(particpant_file=None,
                 orientation='horizontal',
                 alpha=0.5,
                 with_url=True,
-                outdir='.',
+                outdir='output/',
                 tmpdir='individual',
                 n_blank=0,
                 color=None,
@@ -322,6 +349,8 @@ def make_badges(particpant_file=None,
     n_ppl = len(people)
 
     # make out directory
+    if outdir[-1]!='/':
+        outdir = outdir+'/'
     if os.path.isdir(outdir) is False:
         os.mkdir(outdir)
 
@@ -348,12 +377,11 @@ def make_badges(particpant_file=None,
                   orientation=orientation,
                   outdir=tmpdir)
     if n_blank>0:
-        print('Making blank badges')
+        print('Making {0} blank badges'.format(n_blank))
     for i in range(index+1, index+n_blank+1):
         blnkfile = '{0}namebadge_{1:03d}.png'.format(tmpdir, i)
         fig.savefig(blnkfile)
 
-    print('Collating namebadges on page...')
     collate_on_page(n_ppl + n_blank,
                     outdir,
                     tmpdir,
